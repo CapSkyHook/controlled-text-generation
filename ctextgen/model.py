@@ -34,10 +34,14 @@ class RNN_VAE(nn.Module):
         Word embeddings layer
         """
         if pretrained_embeddings is None:
+            print("PRETRAINED EMBEDDINGS IS NONE")
+            print('emb_dim-{};'.format(str(self.h_dim)))
             self.emb_dim = h_dim
             self.word_emb = nn.Embedding(n_vocab, h_dim)
         else:
+            print("PRETRAINED EMBEDDINGS IS NOT NONE")
             self.emb_dim = pretrained_embeddings.size(1)
+            print('emb_dim-{};'.format(str(self.emb_dim)))
             self.word_emb = nn.Embedding(n_vocab, self.emb_dim)
 
             # Set pretrained embeddings
