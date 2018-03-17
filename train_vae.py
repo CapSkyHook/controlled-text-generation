@@ -47,6 +47,7 @@ model = RNN_VAE(
 
 
 def main():
+    print("HERE")
     # # Annealing for KL term
     # kld_start_inc = 3000
     # kld_weight = 0.01
