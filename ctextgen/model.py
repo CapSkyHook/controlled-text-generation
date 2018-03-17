@@ -41,7 +41,7 @@ class RNN_VAE(nn.Module):
         else:
             print("PRETRAINED EMBEDDINGS IS NOT NONE")
             self.emb_dim = pretrained_embeddings.size(1)
-            print('emb_dim-{};'.format(str(self.emb_dim)))
+            print('emb_dim-{}; n_vocab-{};'.format(str(self.emb_dim), str(n_vocab)))
             self.word_emb = nn.Embedding(n_vocab, self.emb_dim)
             print("Made word embeddings")
             # Set pretrained embeddings
