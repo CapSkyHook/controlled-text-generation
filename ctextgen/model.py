@@ -29,7 +29,7 @@ class RNN_VAE(nn.Module):
         self.p_word_dropout = p_word_dropout
 
         self.gpu = gpu
-
+        print("RNN VAE BEFORE WORD EMBEDDINGS")
         """
         Word embeddings layer
         """
@@ -45,20 +45,20 @@ class RNN_VAE(nn.Module):
 
             if freeze_embeddings:
                 self.word_emb.weight.requires_grad = False
-
+        print("RNN VAE BEFORE ENCODER")
         """
         Encoder is GRU with FC layers connected to last hidden unit
         """
         self.encoder = nn.GRU(self.emb_dim, h_dim)
         self.q_mu = nn.Linear(h_dim, z_dim)
         self.q_logvar = nn.Linear(h_dim, z_dim)
-
+        print("RNN VAE BEFORE DCODER")
         """
         Decoder is GRU with `z` and `c` appended at its inputs
         """
         self.decoder = nn.GRU(self.emb_dim+z_dim+c_dim, z_dim+c_dim, dropout=0.3)
         self.decoder_fc = nn.Linear(z_dim+c_dim, n_vocab)
-
+        print("RNN VAE BEFORE DESCRIMINIVATOR")
         """
         Discriminator is CNN as in Kim, 2014
         """
@@ -74,7 +74,7 @@ class RNN_VAE(nn.Module):
         self.discriminator = nn.ModuleList([
             self.conv3, self.conv4, self.conv5, self.disc_fc
         ])
-
+        print("RNN VAE BEFORE GROUPING MODEL PARAMS")
         """
         Grouping the model's parameters: separating encoder, decoder, and discriminator
         """
@@ -93,7 +93,7 @@ class RNN_VAE(nn.Module):
         self.vae_params = filter(lambda p: p.requires_grad, self.vae_params)
 
         self.discriminator_params = filter(lambda p: p.requires_grad, self.discriminator.parameters())
-
+        print("RNN VAE BEFORE USE GPU IF SET")
         """
         Use GPU if set
         """
