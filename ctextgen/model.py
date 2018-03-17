@@ -43,11 +43,12 @@ class RNN_VAE(nn.Module):
             self.emb_dim = pretrained_embeddings.size(1)
             print('emb_dim-{};'.format(str(self.emb_dim)))
             self.word_emb = nn.Embedding(n_vocab, self.emb_dim)
-
+            print("Made word embeddings")
             # Set pretrained embeddings
             self.word_emb.weight.data.copy_(pretrained_embeddings)
-
+            print("set pretrained embeddings")
             if freeze_embeddings:
+                print("freeze embeddings")
                 self.word_emb.weight.requires_grad = False
         print("RNN VAE BEFORE ENCODER")
         """
