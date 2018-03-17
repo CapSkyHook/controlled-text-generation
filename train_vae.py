@@ -47,46 +47,46 @@ model = RNN_VAE(
 
 
 def main():
-    # Annealing for KL term
-    kld_start_inc = 3000
-    kld_weight = 0.01
-    kld_max = 0.15
-    kld_inc = (kld_max - kld_weight) / (n_iter - kld_start_inc)
-
-    trainer = optim.Adam(model.vae_params, lr=lr)
-
-    for it in range(n_iter):
-        inputs, labels = dataset.next_batch(args.gpu)
-
-        recon_loss, kl_loss = model.forward(inputs)
-        loss = recon_loss + kld_weight * kl_loss
-
-        # Anneal kl_weight
-        if it > kld_start_inc and kld_weight < kld_max:
-            kld_weight += kld_inc
-
-        loss.backward()
-        grad_norm = torch.nn.utils.clip_grad_norm(model.vae_params, 5)
-        trainer.step()
-        trainer.zero_grad()
-
-        if it % log_interval == 0:
-            z = model.sample_z_prior(1)
-            c = model.sample_c_prior(1)
-
-            sample_idxs = model.sample_sentence(z, c)
-            sample_sent = dataset.idxs2sentence(sample_idxs)
-
-            print('Iter-{}; Loss: {:.4f}; Recon: {:.4f}; KL: {:.4f}; Grad_norm: {:.4f};'
-                  .format(it, loss.data[0], recon_loss.data[0], kl_loss.data[0], grad_norm))
-
-            print('Sample: "{}"'.format(sample_sent))
-            print()
-
-        # Anneal learning rate
-        new_lr = lr * (0.5 ** (it // lr_decay_every))
-        for param_group in trainer.param_groups:
-            param_group['lr'] = new_lr
+    # # Annealing for KL term
+    # kld_start_inc = 3000
+    # kld_weight = 0.01
+    # kld_max = 0.15
+    # kld_inc = (kld_max - kld_weight) / (n_iter - kld_start_inc)
+    #
+    # trainer = optim.Adam(model.vae_params, lr=lr)
+    #
+    # for it in range(n_iter):
+    #     inputs, labels = dataset.next_batch(args.gpu)
+    #
+    #     recon_loss, kl_loss = model.forward(inputs)
+    #     loss = recon_loss + kld_weight * kl_loss
+    #
+    #     # Anneal kl_weight
+    #     if it > kld_start_inc and kld_weight < kld_max:
+    #         kld_weight += kld_inc
+    #
+    #     loss.backward()
+    #     grad_norm = torch.nn.utils.clip_grad_norm(model.vae_params, 5)
+    #     trainer.step()
+    #     trainer.zero_grad()
+    #
+    #     if it % log_interval == 0:
+    #         z = model.sample_z_prior(1)
+    #         c = model.sample_c_prior(1)
+    #
+    #         sample_idxs = model.sample_sentence(z, c)
+    #         sample_sent = dataset.idxs2sentence(sample_idxs)
+    #
+    #         print('Iter-{}; Loss: {:.4f}; Recon: {:.4f}; KL: {:.4f}; Grad_norm: {:.4f};'
+    #               .format(it, loss.data[0], recon_loss.data[0], kl_loss.data[0], grad_norm))
+    #
+    #         print('Sample: "{}"'.format(sample_sent))
+    #         print()
+    #
+    #     # Anneal learning rate
+    #     new_lr = lr * (0.5 ** (it // lr_decay_every))
+    #     for param_group in trainer.param_groups:
+    #         param_group['lr'] = new_lr
 
 
 def save_model():
