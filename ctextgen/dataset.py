@@ -1,5 +1,32 @@
 from torchtext import data, datasets
 from torchtext.vocab import GloVe
+import os
+
+class MyDataset:
+
+    def __init__(self, data_dir, filenames, emb_dim=50, mbsize=32 ):
+        self.TEXT = data.Field(sequential=True, init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
+        self.LABEL = data.Field(sequential=False, unk_token=None)
+
+        # Only take sentences with length <= 15
+        f = lambda ex: len(ex.text) <= 15 and ex.label != 'neutral'
+
+        train, val, test = data.TabularDataset.splits(
+            path=data_dir, format='csv', skip_header=True,
+            train=filenames[0], validation=filenames[0], test=filenames[1],
+            fine_grained=False, train_subtrees=False,
+            filter_pred=f, fields=[self.TEXT, self.LABEL]
+        )
+
+        self.TEXT.build_vocab(train, vectors=GloVe('6B', dim=emb_dim))
+        self.LABEL.build_vocab(train)
+
+        self.n_vocab = len(self.TEXT.vocab.itos)
+        self.emb_dim = emb_dim
+
+        self.train_iter, self.val_iter, _ = data.BucketIterator.splits(
+            (train, val, test), batch_size=mbsize, device=-1, shuffle=True
+        )
 
 
 class SST_Dataset:
