@@ -1,10 +1,21 @@
+import re
 from torchtext import data, datasets
+import spacy
 from torchtext.vocab import GloVe
-import os
+import os, csv
 
 class MyDataset:
 
     def __init__(self, data_dir, filenames, emb_dim=50, mbsize=32 ):
+        self.nlp = spacy.load('en')
+
+        if not os.path.isfile(data_dir+filenames[0] + ".csv"):
+            self.convertTxtToCSV(data_dir, filenames)
+
+        train_file = data_dir + filenames[0] + ".csv"
+        validation_file = data_dir + filenames[0] + ".csv"
+        test_file = data_dir + filenames[1] + ".csv"
+
         self.TEXT = data.Field(sequential=True, init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
         self.LABEL = data.Field(sequential=False, unk_token=None)
 
@@ -13,7 +24,7 @@ class MyDataset:
 
         train, val, test = data.TabularDataset.splits(
             path=data_dir, format='csv', skip_header=True,
-            train=filenames[0], validation=filenames[0], test=filenames[1],
+            train=train_file, validation=validation_file, test=test_file,
             fine_grained=False, train_subtrees=False,
             filter_pred=f, fields=[self.TEXT, self.LABEL]
         )
@@ -28,6 +39,44 @@ class MyDataset:
             (train, val, test), batch_size=mbsize, device=-1, shuffle=True
         )
 
+    def convertTxtToCSV(self, data_dir, filenames):
+        for filename in filenames:
+            with open(data_dir + filename + ".txt", 'r', encoding='utf-8', errors='ignore') as f:
+                file = f.read()
+                tokens = self.make_tokens(file)
+
+                i = 0
+                wr = csv.writer(data_dir + filename + ".csv")
+                while i < len(tokens):
+                    wr.writerow(" ".join([tokens[i:min(i+20, len(tokens))]]))
+                    i = min(i+20, len(tokens))
+
+    def tokenizer(self, sentences):
+        return [tok.text.lower() for tok in self.nlp.tokenizer(sentences)]
+
+    def prepare_text(self, file):
+        # remove excess spaces, \n characters
+        file = re.sub(" {1,}", " ", file)
+        file = re.sub("\n", " ", file)
+        return file
+
+    def make_tokens(self, file):
+        file = self.prepare_text(file)
+        tokens = self.tokenizer(file)
+        for i in range(len(tokens)):
+            # sub out special words such as kill'd for killed
+            if tokens[i][-2:] == "'d'":
+                tokens[i] = tokens[i][:-2] + "ed"
+            # fix some spacy specific tokenization bugs around '-'
+            if tokens[i][-2:] == '.-':
+                tokens[i] = tokens[i][:-2]
+                tokens.insert(i, '.')
+                tokens.insert(i+1, '-')
+            if tokens[i][-2:] == ',-':
+                tokens[i] = tokens[i][:-2]
+                tokens.insert(i, ',')
+                tokens.insert(i+1, '-')
+        return tokens
 
 class SST_Dataset:
 
