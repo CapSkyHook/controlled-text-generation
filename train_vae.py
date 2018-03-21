@@ -56,6 +56,7 @@ def main():
     trainer = optim.Adam(model.vae_params, lr=lr)
 
     for it in range(n_iter):
+        pdb.set_trace()
         inputs = dataset.next_batch(args.gpu)
 
         recon_loss, kl_loss = model.forward(inputs)
