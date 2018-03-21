@@ -5,6 +5,7 @@ class BookReader(data.Dataset):
 
     name = 'book'
     dirname = 'data'
+    urls = []
 
     @staticmethod
     def sort_key(ex):

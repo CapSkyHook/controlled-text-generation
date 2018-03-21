@@ -1,4 +1,4 @@
-import re
+import pdb, re
 from torchtext import data, datasets
 import spacy
 from torchtext.vocab import GloVe
@@ -13,7 +13,7 @@ class Books_Dataset:
 
         # Only take sentences with length <= 15
         f = lambda ex: len(ex.text) <= 15
-
+        
         train, test = bookreader.BookReader.splits(
             self.TEXT, self.LABEL, filter_pred=f
         )
@@ -28,12 +28,14 @@ class Books_Dataset:
             (train, test), batch_size=mbsize, device=-1, shuffle=True
         )
 
+
     def get_vocab_vectors(self):
         return self.TEXT.vocab.vectors
 
     def next_batch(self, gpu=False):
+        pdb.set_trace()
         batch = next(iter(self.train_iter))
-
+        pdb.set_trace()
         if gpu:
             return batch.text.cuda(), batch.label.cuda()
 
