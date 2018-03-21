@@ -2,7 +2,7 @@ import re
 from torchtext import data, datasets
 import spacy
 from torchtext.vocab import GloVe
-import os, csv
+import os, csv, pdb
 
 class MyDataset:
 
@@ -13,23 +13,24 @@ class MyDataset:
             self.convertTxtToCSV(data_dir, filenames)
 
 
-        train_file = data_dir + filenames[0] + ".csv"
-        validation_file = data_dir + filenames[0] + ".csv"
-        test_file = data_dir + filenames[1] + ".csv"
+        train_file = filenames[0] + ".csv"
+        validation_file = filenames[1] + ".csv"
+        test_file = filenames[2] + ".csv"
 
         self.TEXT = data.Field(sequential=True, init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
         self.LABEL = data.Field(sequential=False, unk_token=None)
 
         # Only take sentences with length <= 15
         f = lambda ex: len(ex.text) <= 15 and ex.label != 'neutral'
+        # pdb.set_trace()
 
         train, val, test = data.TabularDataset.splits(
-            path=data_dir, format='csv', skip_header=True,
-            train=filenames[0]+'.csv', validation=filenames[0]+'.csv', test=filenames[1]+'csv',
+            self.TEXT, self.LABEL,
+            format='csv', skip_header=False,
+            train=train_file, validation=validation_file, test=test_file,
             fine_grained=False, train_subtrees=False,
-            filter_pred=f, fields=[self.TEXT, self.LABEL]
+            filter_pred=f
         )
-
         self.TEXT.build_vocab(train, vectors=GloVe('6B', dim=emb_dim))
         self.LABEL.build_vocab(train)
 
@@ -51,6 +52,7 @@ class MyDataset:
             with open(data_dir + filename + ".csv", 'w', encoding='utf-8', newline='\n') as f:
                 wr = csv.writer(f, delimiter=' ',
                                 quotechar=' ', escapechar=' ', quoting=csv.QUOTE_NONE)
+                wr.writerow(['text'])
                 while i < len(tokens):
                     line_count = min(i+20, len(tokens))
                     wr.writerow([" ".join(tokens[i:line_count])])
