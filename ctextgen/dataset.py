@@ -13,11 +13,11 @@ class MyDataset:
             self.convertTxtToCSV(data_dir, filenames)
 
 
-        train_file = filenames[0] + ".csv"
-        validation_file = filenames[1] + ".csv"
-        test_file = filenames[2] + ".csv"
+        train_file = data_dir + filenames[0] + ".csv"
+        validation_file = data_dir +filenames[1] + ".csv"
+        test_file = data_dir + filenames[2] + ".csv"
 
-        self.TEXT = data.Field(sequential=True, init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
+        self.TEXT = data.Field(sequential=False, init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
         self.LABEL = data.Field(sequential=False, unk_token=None)
 
 
@@ -44,7 +44,7 @@ class MyDataset:
         self.emb_dim = emb_dim
 
         self.train_iter, self.val_iter, _ = data.BucketIterator.splits(
-            (train, val, test), batch_size=mbsize, device=-1, shuffle=True
+            (train, val, test), batch_size=mbsize, device=-1, shuffle=True, sort_key=lambda x: len(x.text)
         )
 
     def convertTxtToCSV(self, data_dir, filenames):
@@ -124,6 +124,7 @@ class SST_Dataset:
 
         # Only take sentences with length <= 15
         f = lambda ex: len(ex.text) <= 15 and ex.label != 'neutral'
+
 
         train, val, test = datasets.SST.splits(
             self.TEXT, self.LABEL, fine_grained=False, train_subtrees=False,
