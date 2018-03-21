@@ -8,9 +8,10 @@ class MyDataset:
 
     def __init__(self, data_dir, filenames, emb_dim=50, mbsize=32 ):
         self.nlp = spacy.load('en')
-
+        print("Filepath = {}".format(data_dir+filenames[0]+'.csv'))
         if not os.path.isfile(data_dir+filenames[0] + ".csv"):
             self.convertTxtToCSV(data_dir, filenames)
+
 
         train_file = data_dir + filenames[0] + ".csv"
         validation_file = data_dir + filenames[0] + ".csv"
@@ -24,7 +25,7 @@ class MyDataset:
 
         train, val, test = data.TabularDataset.splits(
             path=data_dir, format='csv', skip_header=True,
-            train=train_file, validation=validation_file, test=test_file,
+            train=filenames[0]+'.csv', validation=filenames[0]+'.csv', test=filenames[1]+'csv',
             fine_grained=False, train_subtrees=False,
             filter_pred=f, fields=[self.TEXT, self.LABEL]
         )
@@ -46,13 +47,14 @@ class MyDataset:
 
             tokens = self.make_tokens(file)
 
-            with open(data_dir + filename + ".csv", 'w', encoding='utf-8') as f:
-                i = 0
-                wr = csv.writer(data_dir + filename + ".csv", delimiter=' ',
-                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            i = 0
+            with open(data_dir + filename + ".csv", 'w', encoding='utf-8', newline='\n') as f:
+                wr = csv.writer(f, delimiter=' ',
+                                quotechar=' ', escapechar=' ', quoting=csv.QUOTE_NONE)
                 while i < len(tokens):
-                    wr.writerow(" ".join([tokens[i:min(i+20, len(tokens))]]))
-                    i = min(i+20, len(tokens))
+                    line_count = min(i+20, len(tokens))
+                    wr.writerow([" ".join(tokens[i:line_count])])
+                    i = line_count
 
     def tokenizer(self, sentences):
         return [tok.text.lower() for tok in self.nlp.tokenizer(sentences)]
