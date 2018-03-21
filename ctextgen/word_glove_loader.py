@@ -1,11 +1,11 @@
 import os, re, spacy, torch
 import numpy as np
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from torch.utils.data import Dataset
 
 import glove_utils
-from utils import is_remote
+#from utils import is_remote
 
 class MyDataset(Dataset):
 
@@ -71,18 +71,16 @@ class MyDataset(Dataset):
 
     # return an np.matrix of size vocab * glove_dimension
     def get_pretrained_vectors(self):
-        vocab = defaultdict(int)
+        vocab = Counter(self.tokens)
         retVal = []
         for tok in self.tokens:
             # replace unknown words with <unk>
             if self.glv_dict.get(tok) is None:
-                vocab['unk'] += 1
                 retVal.append(self.glv_dict.get('unk'))
             else:
-                vocab[tok] += 1
                 retVal.append(self.glv_dict.get(tok))
         # set length and vocab size
-        self.vocab_size = len(vocab)
+        self.vocab_size = len(vocab.keys())
         return torch.stack(retVal)
 
     # try to load pretrained word vector from file (to save time on local development)

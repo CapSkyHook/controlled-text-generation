@@ -43,10 +43,13 @@ class MyDataset:
         for filename in filenames:
             with open(data_dir + filename + ".txt", 'r', encoding='utf-8', errors='ignore') as f:
                 file = f.read()
-                tokens = self.make_tokens(file)
 
+            tokens = self.make_tokens(file)
+
+            with open(data_dir + filename + ".csv", 'w', encoding='utf-8') as f:
                 i = 0
-                wr = csv.writer(data_dir + filename + ".csv")
+                wr = csv.writer(data_dir + filename + ".csv", delimiter=' ',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 while i < len(tokens):
                     wr.writerow(" ".join([tokens[i:min(i+20, len(tokens))]]))
                     i = min(i+20, len(tokens))
