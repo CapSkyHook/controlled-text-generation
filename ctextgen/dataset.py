@@ -13,15 +13,18 @@ class MyDataset:
             self.convertTxtToCSV(data_dir, filenames)
 
 
-        train_file = data_dir + filenames[0] + ".csv"
-        validation_file = data_dir + filenames[1] + ".csv"
-        test_file = data_dir + filenames[2] + ".csv"
+        train_file = filenames[0] + ".csv"
+        validation_file = filenames[1] + ".csv"
+        test_file = filenames[2] + ".csv"
 
-        self.TEXT = data.Field(init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
+        self.TEXT = data.Field(sequential=True, init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
+        self.LABEL = data.Field(sequential=False, unk_token=None)
+
 
         # Only take sentences with length <= 15
         f = lambda ex: len(ex.text) <= 15 and ex.label != 'neutral'
         # pdb.set_trace()
+
 
         train = data.TabularDataset(path=train_file, format='csv', fields=[('text', self.TEXT)])
         val = data.TabularDataset(path=validation_file, format='csv', fields=[('text', self.TEXT)])
@@ -34,6 +37,7 @@ class MyDataset:
         #     # fine_grained=False, train_subtrees=False,
         #     # filter_pred=f
         # )
+
         self.TEXT.build_vocab(train, vectors=GloVe('6B', dim=emb_dim))
 
         self.n_vocab = len(self.TEXT.vocab.itos)
