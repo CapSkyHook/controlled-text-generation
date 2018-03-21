@@ -56,7 +56,7 @@ def main():
     trainer = optim.Adam(model.vae_params, lr=lr)
 
     for it in range(n_iter):
-        inputs, labels = dataset.next_batch(args.gpu)
+        inputs = dataset.next_batch(args.gpu)
 
         recon_loss, kl_loss = model.forward(inputs)
         loss = recon_loss + kld_weight * kl_loss

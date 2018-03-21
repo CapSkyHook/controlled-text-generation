@@ -18,15 +18,14 @@ class MyDataset:
         test_file = data_dir + filenames[2] + ".csv"
 
         self.TEXT = data.Field(init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
-        self.LABEL = data.Field(sequential=False, unk_token=None)
 
         # Only take sentences with length <= 15
         f = lambda ex: len(ex.text) <= 15 and ex.label != 'neutral'
         # pdb.set_trace()
 
-        train = data.TabularDataset(path=train_file, format='csv', fields=[('text', self.TEXT), ('label', self.LABEL)])
-        val = data.TabularDataset(path=validation_file, format='csv', fields=[('text', self.TEXT), ('label', self.LABEL)])
-        test = data.TabularDataset(path=test_file, format='csv', fields=[('text', self.TEXT), ('label', self.LABEL)])
+        train = data.TabularDataset(path=train_file, format='csv', fields=[('text', self.TEXT)])
+        val = data.TabularDataset(path=validation_file, format='csv', fields=[('text', self.TEXT)])
+        test = data.TabularDataset(path=test_file, format='csv', fields=[('text', self.TEXT)])
 
         # train, val, test = data.TabularDataset.splits(
         #     fields=[('text', self.TEXT), ('label', self.LABEL)],
@@ -36,7 +35,6 @@ class MyDataset:
         #     # filter_pred=f
         # )
         self.TEXT.build_vocab(train, vectors=GloVe('6B', dim=emb_dim))
-        self.LABEL.build_vocab(train)
 
         self.n_vocab = len(self.TEXT.vocab.itos)
         self.emb_dim = emb_dim
@@ -88,6 +86,31 @@ class MyDataset:
                 tokens.insert(i, ',')
                 tokens.insert(i+1, '-')
         return tokens
+
+    def get_vocab_vectors(self):
+        return self.TEXT.vocab.vectors
+
+    def next_batch(self, gpu=False):
+        batch = next(iter(self.train_iter))
+
+        if gpu:
+            return batch.text.cuda()
+
+        return batch.text
+
+    def next_validation_batch(self, gpu=False):
+        batch = next(iter(self.val_iter))
+
+        if gpu:
+            return batch.text.cuda()
+
+        return batch.text
+
+    def idxs2sentence(self, idxs):
+        return ' '.join([self.TEXT.vocab.itos[i] for i in idxs])
+
+    def idx2label(self, idx):
+        return self.LABEL.vocab.itos[idx]
 
 class SST_Dataset:
 
