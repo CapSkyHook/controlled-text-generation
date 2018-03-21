@@ -2,7 +2,45 @@ import re
 from torchtext import data, datasets
 import spacy
 from torchtext.vocab import GloVe
-import os, csv, pdb
+import os, csv, pdb, bookreader
+
+
+class Books_Dataset:
+
+    def __init__(self, emb_dim=50, mbsize=32):
+        self.TEXT = data.Field(init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=None)
+        self.LABEL = data.Field(sequential=False, unk_token=None)
+
+        # Only take sentences with length <= 15
+        f = lambda ex: len(ex.text) <= 15
+
+        train, test = bookreader.BookReader.splits(
+            self.TEXT, self.LABEL, filter_pred=f
+        )
+
+        self.TEXT.build_vocab(train, vectors=GloVe('6B', dim=emb_dim))
+        self.LABEL.build_vocab(train)
+
+        self.n_vocab = len(self.TEXT.vocab.itos)
+        self.emb_dim = emb_dim
+
+        self.train_iter, _ = data.BucketIterator.splits(
+            (train, test), batch_size=mbsize, device=-1, shuffle=True
+        )
+
+    def get_vocab_vectors(self):
+        return self.TEXT.vocab.vectors
+
+    def next_batch(self, gpu=False):
+        batch = next(iter(self.train_iter))
+
+        if gpu:
+            return batch.text.cuda(), batch.label.cuda()
+
+        return batch.text, batch.label
+
+    def idxs2sentence(self, idxs):
+        return ' '.join([self.TEXT.vocab.itos[i] for i in idxs])
 
 class MyDataset:
 

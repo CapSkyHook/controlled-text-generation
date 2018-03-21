@@ -37,8 +37,8 @@ log_interval = 1000
 z_dim = h_dim
 c_dim = 2
 
-dataset = MyDataset(data_dir="./data/", filenames=["shakespeare_train", "shakespeare_val", "shakespeare_test"])
-
+#dataset = MyDataset(data_dir="./data/", filenames=["shakespeare_train", "shakespeare_val", "shakespeare_test"])
+dataset = Books_Dataset()
 model = RNN_VAE(
     dataset.n_vocab, h_dim, z_dim, c_dim, p_word_dropout=0.3,
     pretrained_embeddings=dataset.get_vocab_vectors(), freeze_embeddings=False,
