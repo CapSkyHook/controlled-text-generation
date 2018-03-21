@@ -13,24 +13,28 @@ class MyDataset:
             self.convertTxtToCSV(data_dir, filenames)
 
 
-        train_file = filenames[0] + ".csv"
-        validation_file = filenames[1] + ".csv"
-        test_file = filenames[2] + ".csv"
+        train_file = data_dir + filenames[0] + ".csv"
+        validation_file = data_dir + filenames[1] + ".csv"
+        test_file = data_dir + filenames[2] + ".csv"
 
-        self.TEXT = data.Field(sequential=True, init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
+        self.TEXT = data.Field(init_token='<start>', eos_token='<eos>', lower=True, tokenize='spacy', fix_length=16)
         self.LABEL = data.Field(sequential=False, unk_token=None)
 
         # Only take sentences with length <= 15
         f = lambda ex: len(ex.text) <= 15 and ex.label != 'neutral'
         # pdb.set_trace()
 
-        train, val, test = data.TabularDataset.splits(
-            self.TEXT, self.LABEL,
-            format='csv', skip_header=False,
-            train=train_file, validation=validation_file, test=test_file,
-            fine_grained=False, train_subtrees=False,
-            filter_pred=f
-        )
+        train = data.TabularDataset(path=train_file, format='csv', fields=[('text', self.TEXT), ('label', self.LABEL)])
+        val = data.TabularDataset(path=validation_file, format='csv', fields=[('text', self.TEXT), ('label', self.LABEL)])
+        test = data.TabularDataset(path=test_file, format='csv', fields=[('text', self.TEXT), ('label', self.LABEL)])
+
+        # train, val, test = data.TabularDataset.splits(
+        #     fields=[('text', self.TEXT), ('label', self.LABEL)],
+        #     format='csv', #skip_header=False,
+        #     train=train_file, validation=validation_file, test=test_file,
+        #     # fine_grained=False, train_subtrees=False,
+        #     # filter_pred=f
+        # )
         self.TEXT.build_vocab(train, vectors=GloVe('6B', dim=emb_dim))
         self.LABEL.build_vocab(train)
 
