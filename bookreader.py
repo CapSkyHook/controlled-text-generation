@@ -1,4 +1,4 @@
-import os, glob, pdb
+import os, glob, pdb, re
 from torchtext import data
 
 class BookReader(data.Dataset):
@@ -28,6 +28,9 @@ class BookReader(data.Dataset):
         for fname in glob.iglob(os.path.join(path, '*.txt')):
             with open(fname, 'r', encoding='utf-8') as f:
                 file, label = f.read(), None
+                # remove excess spaces, \n characters
+                file = re.sub(" {1,}", " ", file)
+                file = re.sub("\n{1,}", "\n ", file)
                 for text in file.split("\n"):
                     examples.append(data.Example.fromlist([text, label], fields))
 

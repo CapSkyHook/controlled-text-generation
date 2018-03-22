@@ -210,7 +210,7 @@ class RNN_VAE(nn.Module):
         kl_loss: KL-div loss of VAE.
         """
         self.train()
-        # pdb.set_trace()
+        #pdb.set_trace()
         mbsize = sentence.size(1)
 
         # sentence: '<start> I want to fly <eos>'
