@@ -1,10 +1,10 @@
-import os, glob
+import os, glob, pdb
 from torchtext import data
 
 class BookReader(data.Dataset):
 
-    name = 'book'
-    dirname = 'data'
+    name = ''
+    dirname = ''
     urls = []
 
     @staticmethod
@@ -23,17 +23,18 @@ class BookReader(data.Dataset):
         """
         fields = [('text', text_field), ('label', label_field)]
         examples = []
-
+        pdb.set_trace()
+        blob = glob.iglob(os.path.join(path, '*.txt'))
         for fname in glob.iglob(os.path.join(path, '*.txt')):
             with open(fname, 'r', encoding='utf-8') as f:
-                text = f.readline()
+                text, label = f.readline(), None
             # TODO: should this take [text, label] wth label:None?
-            examples.append(data.Example.fromlist([text], fields))
+            examples.append(data.Example.fromlist([text, label], fields))
 
         super(BookReader, self).__init__(examples, fields, **kwargs)
 
     @classmethod
-    def splits(cls, text_field, label_field, root='.data',
+    def splits(cls, text_field, label_field, root='data',
                train='train', test='test', **kwargs):
         """Create dataset objects for splits of the provided books.
         Arguments:

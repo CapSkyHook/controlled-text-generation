@@ -13,7 +13,7 @@ class Books_Dataset:
 
         # Only take sentences with length <= 15
         f = lambda ex: len(ex.text) <= 15
-        
+
         train, test = bookreader.BookReader.splits(
             self.TEXT, self.LABEL, filter_pred=f
         )
