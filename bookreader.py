@@ -23,13 +23,13 @@ class BookReader(data.Dataset):
         """
         fields = [('text', text_field), ('label', label_field)]
         examples = []
-        pdb.set_trace()
+        # pdb.set_trace()
         blob = glob.iglob(os.path.join(path, '*.txt'))
         for fname in glob.iglob(os.path.join(path, '*.txt')):
             with open(fname, 'r', encoding='utf-8') as f:
-                text, label = f.readline(), None
-            # TODO: should this take [text, label] wth label:None?
-            examples.append(data.Example.fromlist([text, label], fields))
+                file, label = f.read(), None
+                for text in file.split("\n"):
+                    examples.append(data.Example.fromlist([text, label], fields))
 
         super(BookReader, self).__init__(examples, fields, **kwargs)
 

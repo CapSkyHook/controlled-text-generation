@@ -33,9 +33,9 @@ class Books_Dataset:
         return self.TEXT.vocab.vectors
 
     def next_batch(self, gpu=False):
-        pdb.set_trace()
+        # pdb.set_trace()
         batch = next(iter(self.train_iter))
-        pdb.set_trace()
+        # pdb.set_trace()
         if gpu:
             return batch.text.cuda(), batch.label.cuda()
 

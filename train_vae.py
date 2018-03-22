@@ -57,7 +57,7 @@ def main():
 
     for it in range(n_iter):
         inputs, labels = dataset.next_batch(args.gpu)
-        pdb.set_trace()
+        # pdb.set_trace()
 
         recon_loss, kl_loss = model.forward(inputs)
         loss = recon_loss + kld_weight * kl_loss
